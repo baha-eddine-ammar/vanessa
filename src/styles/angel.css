@@ -1,0 +1,156 @@
+.angel-section {
+  position: relative;
+  width: 100%;
+  background-color: var(--color-midnight);
+  overflow: visible;
+}
+
+.angel-pinned-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.angel-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Cinematic Edge Blending and Volumetric Atmosphere */
+.angel-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(8, 7, 13, 0) 40%, rgba(8, 7, 13, 0.45) 75%, rgba(8, 7, 13, 0.95) 100%),
+              linear-gradient(180deg, rgba(8, 7, 13, 0.7) 0%, transparent 15%, transparent 80%, rgba(8, 7, 13, 0.9) 100%);
+  z-index: 2;
+}
+
+.angel-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(217, 183, 122, 0.04) 1px, transparent 1px);
+  background-size: 4px 4px;
+  z-index: 3;
+}
+
+/* Floating Cinematic Subtitles */
+.angel-story-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.angel-story-phrase {
+  position: absolute;
+  max-width: 580px;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  background: rgba(8, 7, 13, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(217, 183, 122, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.angel-story-phrase.pos-bottom-left {
+  bottom: 8vh;
+  left: 6vw;
+}
+
+.angel-story-phrase.pos-bottom-right {
+  bottom: 8vh;
+  right: 6vw;
+  text-align: right;
+}
+
+.angel-story-phrase.pos-bottom-center {
+  bottom: 8vh;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.angel-story-number {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.angel-story-text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+  font-weight: 300;
+  line-height: 1.35;
+  color: var(--color-ivory);
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+}
+
+.angel-story-highlight {
+  color: var(--color-gold-light);
+  font-style: italic;
+}
+
+/* Subtle scrub progress bar */
+.angel-scrub-indicator {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 248, 238, 0.5);
+  text-transform: uppercase;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.angel-scrub-bar {
+  width: 60px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.angel-scrub-fill {
+  height: 100%;
+  background: var(--color-gold);
+  transition: width 0.1s linear;
+}
+
+@media (max-width: 768px) {
+  .angel-story-phrase {
+    max-width: calc(100vw - 2.5rem);
+    padding: 1rem 1.25rem;
+  }
+  
+  .angel-story-phrase.pos-bottom-left,
+  .angel-story-phrase.pos-bottom-right,
+  .angel-story-phrase.pos-bottom-center {
+    left: 1.25rem;
+    right: 1.25rem;
+    bottom: 5vh;
+    transform: none;
+    text-align: center;
+  }
+}

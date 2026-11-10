@@ -1,0 +1,198 @@
+.gallery-section {
+  position: relative;
+  width: 100%;
+  background: radial-gradient(circle at 50% 30%, #151024 0%, #0c0915 50%, #08070D 100%);
+  padding: 8rem 2rem;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 3rem 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.memory-card {
+  position: relative;
+  background: rgba(18, 14, 28, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(217, 183, 122, 0.25);
+  border-radius: 18px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.memory-card:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+  border-color: rgba(217, 183, 122, 0.6);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(217, 183, 122, 0.2);
+}
+
+.memory-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #08070D;
+  margin-bottom: 1.25rem;
+}
+
+.memory-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.memory-card:hover .memory-image {
+  transform: scale(1.06);
+}
+
+/* Elegant Vector Placeholder */
+.memory-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 50%, #201736 0%, #0d0a17 100%);
+  border: 1px dashed rgba(217, 183, 122, 0.3);
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-ivory);
+}
+
+.placeholder-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(217, 183, 122, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gold);
+  margin-bottom: 1rem;
+  border: 1px solid rgba(217, 183, 122, 0.3);
+  box-shadow: 0 0 20px rgba(217, 183, 122, 0.15);
+}
+
+.placeholder-tag {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 0.4rem;
+}
+
+.placeholder-hint {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: rgba(255, 248, 238, 0.5);
+  line-height: 1.4;
+}
+
+.memory-info {
+  padding: 0.25rem 0.5rem 0.5rem 0.5rem;
+}
+
+.memory-date {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.memory-title {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: var(--color-ivory);
+  margin-bottom: 0.5rem;
+}
+
+.memory-caption {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: rgba(255, 248, 238, 0.7);
+  font-weight: 300;
+}
+
+/* Modal / Lightbox */
+.gallery-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 7, 13, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.gallery-modal-content {
+  position: relative;
+  max-width: 700px;
+  width: 100%;
+  background: #110d1c;
+  border: 1px solid rgba(217, 183, 122, 0.4);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(217, 183, 122, 0.2);
+  animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.gallery-modal-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(217, 183, 122, 0.3);
+  color: #FFFDFB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.gallery-modal-close:hover {
+  background: var(--color-gold);
+  color: #08070D;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+  .gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
