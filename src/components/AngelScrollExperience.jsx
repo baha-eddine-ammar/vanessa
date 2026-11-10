@@ -111,6 +111,7 @@ export default function AngelScrollExperience({
         {/* Cinematic Vignette Overlay */}
         <div className="angel-vignette" />
         <div className="angel-grain" />
+        <div className="angel-light-leak" />
 
         {/* Storytelling Text Milestones */}
         <div className="angel-story-container">
@@ -213,3 +214,4 @@ export default function AngelScrollExperience({
     </section>
   );
 }
+

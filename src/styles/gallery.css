@@ -175,6 +175,60 @@
   transition: all 0.3s ease;
 }
 
+.gallery-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(8, 7, 13, 0.7);
+  border: 1px solid rgba(217, 183, 122, 0.35);
+  color: #FFFDFB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.gallery-nav-btn:hover {
+  background: var(--color-gold);
+  color: #08070D;
+  border-color: #F4E2B8;
+  box-shadow: 0 0 15px rgba(217, 183, 122, 0.4);
+}
+
+.gallery-nav-prev {
+  left: 1rem;
+}
+
+.gallery-nav-next {
+  right: 1rem;
+}
+
+.gallery-upload-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  background: rgba(217, 183, 122, 0.15);
+  border: 1px solid rgba(217, 183, 122, 0.3);
+  font-size: 0.75rem;
+  color: var(--color-gold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.75rem;
+}
+
+.gallery-upload-badge:hover {
+  background: rgba(217, 183, 122, 0.3);
+  color: #FFFDFB;
+}
+
 .gallery-modal-close:hover {
   background: var(--color-gold);
   color: #08070D;
@@ -196,3 +250,4 @@
     gap: 2rem;
   }
 }
+

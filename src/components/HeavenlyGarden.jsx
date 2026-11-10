@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Sparkles, Flower2, Wind, Heart } from 'lucide-react';
+import { playStardustBurst } from '../utils/audioEffects';
 import '../styles/garden.css';
 
 export default function HeavenlyGarden() {
@@ -18,7 +19,7 @@ export default function HeavenlyGarden() {
 
     // --- THREE.JS SCENE SETUP ---
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0e0b17, 0.028);
+    scene.fog = new THREE.FogExp2(0x0e0b17, 0.026);
 
     const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 100);
     camera.position.set(0, 0, 16);
@@ -34,20 +35,24 @@ export default function HeavenlyGarden() {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     // --- LIGHTING ---
-    const ambientLight = new THREE.AmbientLight(0xfff5ea, 1.2);
+    const ambientLight = new THREE.AmbientLight(0xfff5ea, 1.3);
     scene.add(ambientLight);
 
-    const goldLight = new THREE.DirectionalLight(0xd9b77a, 2.5);
+    const goldLight = new THREE.DirectionalLight(0xd9b77a, 2.8);
     goldLight.position.set(10, 20, 15);
     scene.add(goldLight);
 
-    const pinkLight = new THREE.PointLight(0xf5c6d0, 3, 30);
+    const pinkLight = new THREE.PointLight(0xf5c6d0, 3.5, 32);
     pinkLight.position.set(-6, 3, 6);
     scene.add(pinkLight);
 
-    const lavenderLight = new THREE.PointLight(0xb9a5d4, 2, 25);
+    const lavenderLight = new THREE.PointLight(0xb9a5d4, 2.5, 26);
     lavenderLight.position.set(6, -4, 4);
     scene.add(lavenderLight);
+
+    // Interactive Mouse Cursor Light
+    const cursorLight = new THREE.PointLight(0xffe2a4, 3, 16);
+    scene.add(cursorLight);
 
     // --- PROCEDURAL GLOWING PARTICLE TEXTURE ---
     const createGlowTexture = () => {
@@ -70,20 +75,20 @@ export default function HeavenlyGarden() {
 
     // --- GOLDEN STARDUST PARTICLES ---
     const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 350 : 750;
+    const particleCount = isMobile ? 400 : 850;
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     const particleScales = new Float32Array(particleCount);
     const particleVels = [];
 
     for (let i = 0; i < particleCount; i++) {
-      particlePositions[i * 3] = (Math.random() - 0.5) * 35;
+      particlePositions[i * 3] = (Math.random() - 0.5) * 36;
       particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 30;
       particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 25;
-      particleScales[i] = Math.random() * 0.8 + 0.3;
+      particleScales[i] = Math.random() * 0.85 + 0.3;
       particleVels.push({
-        y: Math.random() * 0.015 + 0.005,
-        x: (Math.random() - 0.5) * 0.008,
+        y: Math.random() * 0.016 + 0.006,
+        x: (Math.random() - 0.5) * 0.009,
         swaySpeed: Math.random() * 1.5 + 0.5,
         swayOffset: Math.random() * Math.PI * 2,
       });
@@ -92,7 +97,7 @@ export default function HeavenlyGarden() {
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
 
     const particleMat = new THREE.PointsMaterial({
-      size: 0.6,
+      size: 0.65,
       map: glowTexture,
       transparent: true,
       blending: THREE.AdditiveBlending,
@@ -111,11 +116,10 @@ export default function HeavenlyGarden() {
       shape.bezierCurveTo(-0.5, 1.2, -0.4, 0.5, 0, 0);
 
       const geometry = new THREE.ShapeGeometry(shape, 12);
-      // Curve petal vertices for natural 3D depth
       const pos = geometry.attributes.position;
       for (let i = 0; i < pos.count; i++) {
         const y = pos.getY(i);
-        const z = -Math.sin(y * 1.5) * 0.25;
+        const z = -Math.sin(y * 1.5) * 0.28;
         pos.setZ(i, z);
       }
       geometry.computeVertexNormals();
@@ -124,36 +128,36 @@ export default function HeavenlyGarden() {
 
     const petalGeo = createPetalGeometry();
 
-    // Floating Rose Petals Group
-    const petalsGroup = new THREE.Group();
-    const petalCount = isMobile ? 24 : 50;
-    const petalData = [];
-
     const blushMaterial = new THREE.MeshStandardMaterial({
       color: 0xf5c6d0,
-      roughness: 0.4,
-      metalness: 0.1,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.9,
-    });
-
-    const ivoryMaterial = new THREE.MeshStandardMaterial({
-      color: 0xfff8ee,
-      roughness: 0.3,
-      metalness: 0.1,
+      roughness: 0.35,
+      metalness: 0.15,
       side: THREE.DoubleSide,
       transparent: true,
       opacity: 0.92,
     });
 
+    const ivoryMaterial = new THREE.MeshStandardMaterial({
+      color: 0xfff8ee,
+      roughness: 0.25,
+      metalness: 0.12,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.95,
+    });
+
+    // Floating Rose Petals Group
+    const petalsGroup = new THREE.Group();
+    const petalCount = isMobile ? 30 : 65;
+    const petalData = [];
+
     for (let i = 0; i < petalCount; i++) {
-      const mat = Math.random() > 0.4 ? blushMaterial : ivoryMaterial;
+      const mat = Math.random() > 0.45 ? blushMaterial : ivoryMaterial;
       const mesh = new THREE.Mesh(petalGeo, mat);
-      const scale = Math.random() * 0.4 + 0.35;
+      const scale = Math.random() * 0.45 + 0.35;
       mesh.scale.set(scale, scale, scale);
 
-      const x = (Math.random() - 0.5) * 30;
+      const x = (Math.random() - 0.5) * 32;
       const y = (Math.random() - 0.5) * 26;
       const z = (Math.random() - 0.5) * 16;
       mesh.position.set(x, y, z);
@@ -168,16 +172,56 @@ export default function HeavenlyGarden() {
 
       petalData.push({
         mesh,
-        rotSpeedX: (Math.random() - 0.5) * 0.02,
-        rotSpeedY: (Math.random() - 0.5) * 0.025,
-        rotSpeedZ: (Math.random() - 0.5) * 0.015,
-        fallSpeed: Math.random() * 0.02 + 0.01,
+        rotSpeedX: (Math.random() - 0.5) * 0.022,
+        rotSpeedY: (Math.random() - 0.5) * 0.028,
+        rotSpeedZ: (Math.random() - 0.5) * 0.018,
+        fallSpeed: Math.random() * 0.022 + 0.012,
         swaySpeed: Math.random() * 1.5 + 0.5,
         swayAmplitude: Math.random() * 0.02 + 0.01,
         baseX: x,
       });
     }
     scene.add(petalsGroup);
+
+    // --- PROCEDURAL 3D FLOATING ROSES ---
+    const rosesGroup = new THREE.Group();
+    const createRose = () => {
+      const rGroup = new THREE.Group();
+      for (let ring = 0; ring < 3; ring++) {
+        const ringPetals = 4 + ring * 2;
+        const rScale = 0.35 + ring * 0.2;
+        for (let p = 0; p < ringPetals; p++) {
+          const pMesh = new THREE.Mesh(petalGeo, ring % 2 === 0 ? blushMaterial : ivoryMaterial);
+          const angle = (p / ringPetals) * Math.PI * 2;
+          pMesh.scale.set(rScale, rScale, rScale);
+          pMesh.position.set(Math.cos(angle) * 0.35 * (ring + 1), Math.sin(angle) * 0.35 * (ring + 1), ring * 0.12);
+          pMesh.rotation.z = angle + Math.PI / 2;
+          pMesh.rotation.x = 0.35 * (ring + 1);
+          rGroup.add(pMesh);
+        }
+      }
+      return rGroup;
+    };
+
+    const roseCount = isMobile ? 3 : 6;
+    const roseData = [];
+    for (let i = 0; i < roseCount; i++) {
+      const r = createRose();
+      const scale = Math.random() * 0.5 + 0.5;
+      r.scale.set(scale, scale, scale);
+      const x = (Math.random() - 0.5) * 28;
+      const y = (Math.random() - 0.5) * 20;
+      const z = (Math.random() - 0.5) * 14;
+      r.position.set(x, y, z);
+      rosesGroup.add(r);
+      roseData.push({
+        rose: r,
+        rotX: (Math.random() - 0.5) * 0.01,
+        rotY: (Math.random() - 0.5) * 0.015,
+        rotZ: (Math.random() - 0.5) * 0.008,
+      });
+    }
+    scene.add(rosesGroup);
 
     // --- PROCEDURAL FLOATING FEATHER GEOMETRY ---
     const createFeather = () => {
@@ -201,8 +245,8 @@ export default function HeavenlyGarden() {
         color: 0xffffff,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.85,
-        roughness: 0.6,
+        opacity: 0.88,
+        roughness: 0.5,
       });
       const vane = new THREE.Mesh(vaneGeo, vaneMat);
       fGroup.add(vane);
@@ -210,7 +254,7 @@ export default function HeavenlyGarden() {
     };
 
     const feathersGroup = new THREE.Group();
-    const featherCount = isMobile ? 8 : 16;
+    const featherCount = isMobile ? 10 : 20;
     const featherData = [];
 
     for (let i = 0; i < featherCount; i++) {
@@ -228,8 +272,8 @@ export default function HeavenlyGarden() {
 
       featherData.push({
         feather,
-        fallSpeed: Math.random() * 0.012 + 0.006,
-        rotSpeed: (Math.random() - 0.5) * 0.015,
+        fallSpeed: Math.random() * 0.014 + 0.007,
+        rotSpeed: (Math.random() - 0.5) * 0.018,
         sway: Math.random() * 2 + 1,
         initialX: x,
       });
@@ -240,13 +284,11 @@ export default function HeavenlyGarden() {
     const createButterfly = (wingColor) => {
       const bGroup = new THREE.Group();
 
-      // Body
       const bodyGeo = new THREE.CylinderGeometry(0.04, 0.03, 0.6, 8);
       const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3d3024, roughness: 0.5 });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
       bGroup.add(body);
 
-      // Wing shape
       const wingShape = new THREE.Shape();
       wingShape.moveTo(0, 0);
       wingShape.bezierCurveTo(0.6, 0.8, 1.2, 0.4, 0.9, -0.2);
@@ -257,9 +299,9 @@ export default function HeavenlyGarden() {
         color: wingColor,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.9,
-        roughness: 0.3,
-        metalness: 0.2,
+        opacity: 0.92,
+        roughness: 0.2,
+        metalness: 0.3,
       });
 
       const wingLeft = new THREE.Mesh(wingGeo, wingMat);
@@ -282,7 +324,7 @@ export default function HeavenlyGarden() {
     ];
 
     butterflies.forEach((b, index) => {
-      b.group.scale.set(0.65, 0.65, 0.65);
+      b.group.scale.set(0.7, 0.7, 0.7);
       b.group.position.set((index - 1.5) * 6, (Math.random() - 0.5) * 6, Math.random() * 4);
       scene.add(b.group);
     });
@@ -320,26 +362,28 @@ export default function HeavenlyGarden() {
       const elapsed = clock.getElapsedTime();
 
       // Camera parallax
-      targetCameraX = mouseX * 2.2;
-      targetCameraY = mouseY * 1.5;
-      camera.position.x += (targetCameraX - camera.position.x) * 0.04;
-      camera.position.y += (targetCameraY - camera.position.y) * 0.04;
+      targetCameraX = mouseX * 2.5;
+      targetCameraY = mouseY * 1.8;
+      camera.position.x += (targetCameraX - camera.position.x) * 0.05;
+      camera.position.y += (targetCameraY - camera.position.y) * 0.05;
       camera.lookAt(0, 0, 0);
+
+      // Interactive cursor light follow
+      cursorLight.position.set(camera.position.x * 1.8, camera.position.y * 1.8, 6);
 
       // 1. Stardust animation
       const positions = particles.geometry.attributes.position.array;
       for (let i = 0; i < particleCount; i++) {
         const vel = particleVels[i];
-        positions[i * 3 + 1] += vel.y; // drift upward
-        positions[i * 3] += Math.sin(elapsed * vel.swaySpeed + vel.swayOffset) * 0.008;
+        positions[i * 3 + 1] += vel.y;
+        positions[i * 3] += Math.sin(elapsed * vel.swaySpeed + vel.swayOffset) * 0.01;
 
-        // Wrap particles
         if (positions[i * 3 + 1] > 16) {
           positions[i * 3 + 1] = -16;
         }
       }
       particles.geometry.attributes.position.needsUpdate = true;
-      particles.rotation.y = elapsed * 0.02;
+      particles.rotation.y = elapsed * 0.025;
 
       // 2. Petals floating & spinning
       petalData.forEach((pd, i) => {
@@ -349,21 +393,28 @@ export default function HeavenlyGarden() {
         mesh.rotation.z += pd.rotSpeedZ;
 
         mesh.position.y -= pd.fallSpeed;
-        mesh.position.x = pd.baseX + Math.sin(elapsed * pd.swaySpeed + i) * 1.2;
+        mesh.position.x = pd.baseX + Math.sin(elapsed * pd.swaySpeed + i) * 1.3;
 
         if (mesh.position.y < -14) {
           mesh.position.y = 14;
-          mesh.position.x = (Math.random() - 0.5) * 30;
+          mesh.position.x = (Math.random() - 0.5) * 32;
           pd.baseX = mesh.position.x;
         }
       });
 
-      // 3. Feathers swaying downward
+      // 3. Floating 3D Roses
+      roseData.forEach((rd) => {
+        rd.rose.rotation.x += rd.rotX;
+        rd.rose.rotation.y += rd.rotY;
+        rd.rose.rotation.z += rd.rotZ;
+      });
+
+      // 4. Feathers swaying downward
       featherData.forEach((fd, i) => {
         const f = fd.feather;
         f.position.y -= fd.fallSpeed;
-        f.position.x = fd.initialX + Math.sin(elapsed * 0.8 + fd.sway) * 1.5;
-        f.rotation.z = Math.sin(elapsed * 1.2 + i) * 0.3;
+        f.position.x = fd.initialX + Math.sin(elapsed * 0.8 + fd.sway) * 1.6;
+        f.rotation.z = Math.sin(elapsed * 1.2 + i) * 0.35;
         f.rotation.y += fd.rotSpeed;
 
         if (f.position.y < -14) {
@@ -372,18 +423,18 @@ export default function HeavenlyGarden() {
         }
       });
 
-      // 4. Butterflies flying & flapping
+      // 5. Butterflies flying & flapping
       butterflies.forEach((b, i) => {
-        const flap = Math.sin(elapsed * 16 + i * 2) * 0.8;
+        const flap = Math.sin(elapsed * 18 + i * 2) * 0.85;
         b.wingLeft.rotation.y = flap;
         b.wingRight.rotation.y = -flap;
 
-        const radius = 6 + i * 1.5;
-        const speed = 0.4 + i * 0.15;
+        const radius = 6.5 + i * 1.5;
+        const speed = 0.45 + i * 0.15;
         const angle = elapsed * speed + (i * Math.PI) / 2;
 
         b.group.position.x = Math.cos(angle) * radius;
-        b.group.position.y = Math.sin(angle * 1.5) * 2.5 + Math.sin(elapsed * 2 + i);
+        b.group.position.y = Math.sin(angle * 1.5) * 2.8 + Math.sin(elapsed * 2 + i);
         b.group.position.z = Math.sin(angle) * (radius * 0.6);
 
         b.group.rotation.y = -angle + Math.PI / 2;
@@ -391,8 +442,8 @@ export default function HeavenlyGarden() {
       });
 
       // Subtle light oscillation
-      pinkLight.position.x = Math.sin(elapsed * 0.6) * 8;
-      goldLight.position.x = Math.cos(elapsed * 0.4) * 12;
+      pinkLight.position.x = Math.sin(elapsed * 0.6) * 9;
+      goldLight.position.x = Math.cos(elapsed * 0.4) * 13;
 
       renderer.render(scene, camera);
     };
@@ -401,14 +452,16 @@ export default function HeavenlyGarden() {
 
     // Trigger bloom burst on click
     const handleCanvasClick = () => {
+      playStardustBurst();
       setBloomCount((prev) => prev + 1);
-      // Brighten point lights temporarily
-      pinkLight.intensity = 6;
-      goldLight.intensity = 4.5;
+      pinkLight.intensity = 7;
+      goldLight.intensity = 5;
+      cursorLight.intensity = 6;
       setTimeout(() => {
-        pinkLight.intensity = 3;
-        goldLight.intensity = 2.5;
-      }, 900);
+        pinkLight.intensity = 3.5;
+        goldLight.intensity = 2.8;
+        cursorLight.intensity = 3;
+      }, 950);
     };
 
     container.addEventListener('click', handleCanvasClick);
@@ -420,7 +473,6 @@ export default function HeavenlyGarden() {
       if (container) container.removeEventListener('click', handleCanvasClick);
       cancelAnimationFrame(animationId);
 
-      // Dispose three.js resources
       renderer.dispose();
       particleGeo.dispose();
       particleMat.dispose();

@@ -151,3 +151,4 @@ export default function LoadingScreen({ progress, isReady, onComplete }) {
     </div>
   );
 }
+

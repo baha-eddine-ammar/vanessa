@@ -16,3 +16,4 @@ Place your personal photographs here for Vanessa.
    `src/data/memories.js`
 
 3. If no custom image is found for a slot, the website automatically falls back to an elegant romantic starry illustration card so the website always looks stunning!
+

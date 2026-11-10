@@ -116,3 +116,37 @@
   margin-top: 1.5rem;
   border-radius: 1px;
 }
+
+.card-sparkle-dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #FFFDFB;
+  box-shadow: 0 0 10px #D9B77A;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.dot-1 {
+  top: 20%;
+  right: 15%;
+  animation: floatDot 4s infinite ease-in-out;
+}
+
+.dot-2 {
+  bottom: 25%;
+  left: 12%;
+  animation: floatDot 5s infinite ease-in-out 1s;
+}
+
+.beauty-card-wrapper:hover .card-sparkle-dot {
+  opacity: 0.8;
+}
+
+@keyframes floatDot {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6px, -8px) scale(1.4); }
+}
+

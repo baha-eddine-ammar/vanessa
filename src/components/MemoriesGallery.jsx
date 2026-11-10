@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Camera, Sparkles, Heart, Star, Moon, X, Maximize2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Camera, Sparkles, Heart, Star, Moon, X, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { defaultMemories } from '../data/memories';
 import '../styles/gallery.css';
 
@@ -12,8 +12,9 @@ const THEME_ICONS = {
   infinity: Sparkles,
 };
 
-function MemoryItem({ item, index, onSelect }) {
+function MemoryItem({ item, index, onSelect, customImage, onUploadCustom }) {
   const [imageError, setImageError] = useState(false);
+  const fileInputRef = useRef(null);
   const IconComponent = THEME_ICONS[item.theme] || Sparkles;
 
   // Gentle alternating angles for organic floating layout
@@ -22,24 +23,41 @@ function MemoryItem({ item, index, onSelect }) {
 
   const baseUrl = import.meta.env.BASE_URL || './';
   const prefix = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-  const imageSrc = `${prefix}${item.image}`;
+  const defaultSrc = `${prefix}${item.image}`;
+  const effectiveSrc = customImage || defaultSrc;
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          onUploadCustom(item.id, event.target.result);
+          setImageError(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   return (
     <div
       className="memory-card"
       style={{ transform: `rotate(${tilt}deg)` }}
-      onClick={() => onSelect(item, imageError, imageSrc)}
+      onClick={() => onSelect(index)}
       role="button"
       tabIndex={0}
       aria-label={`View memory: ${item.title}`}
     >
       <div className="memory-image-container">
-        {!imageError ? (
+        {!imageError || customImage ? (
           <img
-            src={imageSrc}
+            src={effectiveSrc}
             alt={item.title}
             className="memory-image"
-            onError={() => setImageError(true)}
+            onError={() => {
+              if (!customImage) setImageError(true);
+            }}
             loading="lazy"
           />
         ) : (
@@ -51,6 +69,23 @@ function MemoryItem({ item, index, onSelect }) {
             <p className="placeholder-hint">
               Drop photo into <code>public/images/memories/memory-{item.id}.jpg</code>
             </p>
+            <div
+              className="gallery-upload-badge"
+              onClick={(e) => {
+                e.stopPropagation();
+                fileInputRef.current?.click();
+              }}
+            >
+              <Upload size={13} />
+              <span>Preview Photo Now</span>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
           </div>
         )}
       </div>
@@ -65,21 +100,38 @@ function MemoryItem({ item, index, onSelect }) {
 }
 
 export default function MemoriesGallery() {
-  const [selectedMemory, setSelectedMemory] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [customImages, setCustomImages] = useState({});
+  const modalFileInputRef = useRef(null);
+
+  const selectedMemory = selectedIndex !== null ? defaultMemories[selectedIndex] : null;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (selectedIndex === null) return;
       if (e.key === 'Escape') {
-        setSelectedMemory(null);
+        setSelectedIndex(null);
+      } else if (e.key === 'ArrowRight') {
+        setSelectedIndex((prev) => (prev + 1) % defaultMemories.length);
+      } else if (e.key === 'ArrowLeft') {
+        setSelectedIndex((prev) => (prev - 1 + defaultMemories.length) % defaultMemories.length);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [selectedIndex]);
 
-  const handleSelect = (item, isError, resolvedSrc) => {
-    setSelectedMemory({ ...item, isError, resolvedSrc });
+  const handleSelect = (index) => {
+    setSelectedIndex(index);
   };
+
+  const handleUploadCustom = (id, dataUrl) => {
+    setCustomImages((prev) => ({ ...prev, [id]: dataUrl }));
+  };
+
+  const currentCustom = selectedMemory ? customImages[selectedMemory.id] : null;
+  const baseUrl = import.meta.env.BASE_URL || './';
+  const prefix = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 
   return (
     <section id="memories" className="gallery-section">
@@ -100,6 +152,8 @@ export default function MemoriesGallery() {
               item={item}
               index={index}
               onSelect={handleSelect}
+              customImage={customImages[item.id]}
+              onUploadCustom={handleUploadCustom}
             />
           ))}
         </div>
@@ -109,31 +163,56 @@ export default function MemoriesGallery() {
       {selectedMemory && (
         <div
           className="gallery-modal-backdrop"
-          onClick={() => setSelectedMemory(null)}
+          onClick={() => setSelectedIndex(null)}
         >
           <div
             className="gallery-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Close button */}
             <button
               className="gallery-modal-close"
-              onClick={() => setSelectedMemory(null)}
+              onClick={() => setSelectedIndex(null)}
               aria-label="Close photo view"
             >
               <X size={20} />
             </button>
 
-            <div style={{ width: '100%', maxHeight: '60vh', overflow: 'hidden' }}>
-              {!selectedMemory.isError ? (
+            {/* Previous button */}
+            <button
+              className="gallery-nav-btn gallery-nav-prev"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedIndex((prev) => (prev - 1 + defaultMemories.length) % defaultMemories.length);
+              }}
+              aria-label="Previous memory"
+            >
+              <ChevronLeft size={22} />
+            </button>
+
+            {/* Next button */}
+            <button
+              className="gallery-nav-btn gallery-nav-next"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedIndex((prev) => (prev + 1) % defaultMemories.length);
+              }}
+              aria-label="Next memory"
+            >
+              <ChevronRight size={22} />
+            </button>
+
+            <div style={{ width: '100%', maxHeight: '60vh', overflow: 'hidden', position: 'relative' }}>
+              {currentCustom ? (
                 <img
-                  src={selectedMemory.resolvedSrc}
+                  src={currentCustom}
                   alt={selectedMemory.title}
                   style={{ width: '100%', height: 'auto', display: 'block' }}
                 />
               ) : (
                 <div
                   className="memory-placeholder"
-                  style={{ minHeight: '320px', padding: '3rem' }}
+                  style={{ minHeight: '340px', padding: '3rem' }}
                 >
                   <div className="placeholder-icon" style={{ width: '64px', height: '64px' }}>
                     <Sparkles size={32} />
@@ -144,15 +223,45 @@ export default function MemoriesGallery() {
                   <p style={{ color: 'var(--color-gold)', fontSize: '0.85rem', marginBottom: '1rem' }}>
                     {selectedMemory.date}
                   </p>
-                  <p style={{ color: 'rgba(255, 248, 238, 0.7)', maxWidth: '440px', lineHeight: 1.6 }}>
-                    This frame is prepared and ready for your real photograph. Once placed in <code>public/images/memories/memory-{selectedMemory.id}.jpg</code>, it will automatically bloom right here.
+                  <p style={{ color: 'rgba(255, 248, 238, 0.7)', maxWidth: '440px', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                    This frame is prepared for your personal picture. Once dropped into <code>public/images/memories/memory-{selectedMemory.id}.jpg</code>, it will permanently shine here.
                   </p>
+                  <div
+                    className="gallery-upload-badge"
+                    onClick={() => modalFileInputRef.current?.click()}
+                  >
+                    <Upload size={14} />
+                    <span>Select Photo to Preview in Browser</span>
+                  </div>
+                  <input
+                    ref={modalFileInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          if (ev.target?.result) {
+                            handleUploadCustom(selectedMemory.id, ev.target.result);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
                 </div>
               )}
             </div>
 
             <div style={{ padding: '2rem' }}>
-              <span className="memory-date">{selectedMemory.date}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                <span className="memory-date">{selectedMemory.date}</span>
+                <span style={{ fontSize: '0.75rem', color: 'rgba(217, 183, 122, 0.7)', letterSpacing: '0.1em' }}>
+                  {selectedIndex + 1} of {defaultMemories.length}
+                </span>
+              </div>
               <h3 className="memory-title font-serif" style={{ fontSize: '1.8rem', marginBottom: '0.8rem' }}>
                 {selectedMemory.title}
               </h3>

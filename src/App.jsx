@@ -4,11 +4,11 @@ import LoadingScreen from './components/LoadingScreen';
 import Navigation from './components/Navigation';
 import MusicControl from './components/MusicControl';
 import FloatingPetals from './components/FloatingPetals';
+import CustomCursor from './components/CustomCursor';
 import Intro from './components/Intro';
 import AngelScrollExperience from './components/AngelScrollExperience';
 import HeavenlyGarden from './components/HeavenlyGarden';
 import BeautyCards from './components/BeautyCards';
-import MemoriesGallery from './components/MemoriesGallery';
 import FinalLetter from './components/FinalLetter';
 
 export default function App() {
@@ -42,6 +42,7 @@ export default function App() {
 
       {/* Global Ambient Canvas Elements */}
       <FloatingPetals />
+      <CustomCursor />
 
       {/* Fixed UI Controls */}
       <Navigation />
@@ -65,12 +66,10 @@ export default function App() {
         {/* Scene 4: Why Vanessa Is Special */}
         <BeautyCards />
 
-        {/* Scene 5: Our Little Memories */}
-        <MemoriesGallery />
-
-        {/* Scene 6: The Final Love Letter */}
+        {/* Scene 5: The Final Love Letter */}
         <FinalLetter />
       </main>
     </div>
   );
 }
+

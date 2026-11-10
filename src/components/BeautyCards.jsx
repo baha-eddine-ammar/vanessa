@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Sparkles, Compass, Moon, Infinity } from 'lucide-react';
+import { playCrystalChime } from '../utils/audioEffects';
 import '../styles/cards.css';
 
 const CARDS_DATA = [
@@ -33,7 +34,7 @@ const CARDS_DATA = [
   },
 ];
 
-function TiltCard({ item }) {
+function TiltCard({ item, index }) {
   const cardRef = useRef(null);
   const [transformStyle, setTransformStyle] = useState('');
   const [glareStyle, setGlareStyle] = useState({ opacity: 0 });
@@ -49,19 +50,23 @@ function TiltCard({ item }) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotateX = ((y - centerY) / centerY) * -10; // max 10 deg tilt
-    const rotateY = ((x - centerX) / centerX) * 10;
+    const rotateX = ((y - centerY) / centerY) * -12;
+    const rotateY = ((x - centerX) / centerX) * 12;
 
     setTransformStyle(
-      `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`
+      `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.03, 1.03, 1.03)`
     );
 
     const glareX = (x / rect.width) * 100;
     const glareY = (y / rect.height) * 100;
     setGlareStyle({
       opacity: 1,
-      background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(217, 183, 122, 0.25) 0%, transparent 60%)`,
+      background: `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(217, 183, 122, 0.3) 0%, rgba(245, 198, 208, 0.1) 40%, transparent 70%)`,
     });
+  };
+
+  const handleMouseEnter = () => {
+    playCrystalChime(650 + index * 90);
   };
 
   const handleMouseLeave = () => {
@@ -74,11 +79,16 @@ function TiltCard({ item }) {
       ref={cardRef}
       className="beauty-card-wrapper"
       onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{ transform: transformStyle }}
     >
       <div className="beauty-card">
         <div className="card-glare" style={glareStyle} />
+
+        {/* Floating internal stardust glints */}
+        <div className="card-sparkle-dot dot-1" />
+        <div className="card-sparkle-dot dot-2" />
 
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -112,7 +122,7 @@ export default function BeautyCards() {
 
         <div className="cards-grid">
           {CARDS_DATA.map((item, index) => (
-            <TiltCard key={index} item={item} />
+            <TiltCard key={index} item={item} index={index} />
           ))}
         </div>
       </div>

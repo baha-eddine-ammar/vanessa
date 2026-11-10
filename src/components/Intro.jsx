@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Sparkles, Volume2, VolumeX, ChevronDown } from 'lucide-react';
+import { playStardustBurst } from '../utils/audioEffects';
 import '../styles/intro.css';
 
 export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
@@ -7,11 +8,11 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
   const [stage, setStage] = useState(0); // 0: initial, 1: quote, 2: name, 3: full reveal
   const [audioWithEnter, setAudioWithEnter] = useState(true);
 
-  // Progressive text stages
+  // Progressive text stages with cinematic cadence
   useEffect(() => {
-    const t1 = setTimeout(() => setStage(1), 800);
-    const t2 = setTimeout(() => setStage(2), 2400);
-    const t3 = setTimeout(() => setStage(3), 4200);
+    const t1 = setTimeout(() => setStage(1), 700);
+    const t2 = setTimeout(() => setStage(2), 2200);
+    const t3 = setTimeout(() => setStage(3), 3900);
 
     return () => {
       clearTimeout(t1);
@@ -20,7 +21,7 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
     };
   }, []);
 
-  // Starfield & Golden Particle Canvas
+  // Multi-layered Starfield & Dynamic Golden Stardust Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -38,23 +39,39 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
     };
     window.addEventListener('resize', handleResize);
 
-    // Particle definitions
-    const PARTICLE_COUNT = 90;
+    // Particle definitions with velocity and twinkling
+    const PARTICLE_COUNT = 110;
     const particles = [];
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 1.8 + 0.4,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3 - 0.15,
+        radius: Math.random() * 2.2 + 0.4,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35 - 0.18,
         alpha: Math.random() * 0.8 + 0.2,
         baseAlpha: Math.random() * 0.7 + 0.3,
-        pulseSpeed: Math.random() * 0.02 + 0.005,
-        isGold: Math.random() > 0.35,
+        pulseSpeed: Math.random() * 0.025 + 0.008,
+        isGold: Math.random() > 0.3,
+        glowBlur: Math.random() * 12 + 4,
       });
     }
+
+    // Shooting stars / celestial comets
+    const shootingStars = [];
+    const spawnShootingStar = () => {
+      shootingStars.push({
+        x: Math.random() * width * 0.8,
+        y: Math.random() * height * 0.4,
+        length: Math.random() * 80 + 50,
+        speed: Math.random() * 8 + 6,
+        angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
+        alpha: 1,
+      });
+    };
+
+    let shootingTimer = setInterval(spawnShootingStar, 4000);
 
     let time = 0;
 
@@ -73,23 +90,51 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        const currentAlpha = p.baseAlpha + Math.sin(time * p.pulseSpeed * 20 + p.x) * 0.25;
+        const currentAlpha = p.baseAlpha + Math.sin(time * p.pulseSpeed * 20 + p.x) * 0.3;
         const clampedAlpha = Math.max(0.1, Math.min(1, currentAlpha));
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         if (p.isGold) {
           ctx.fillStyle = `rgba(217, 183, 122, ${clampedAlpha})`;
-          ctx.shadowColor = 'rgba(217, 183, 122, 0.6)';
-          ctx.shadowBlur = p.radius * 3;
+          ctx.shadowColor = 'rgba(217, 183, 122, 0.7)';
+          ctx.shadowBlur = p.glowBlur;
         } else {
-          ctx.fillStyle = `rgba(255, 248, 238, ${clampedAlpha * 0.8})`;
-          ctx.shadowColor = 'rgba(255, 248, 238, 0.4)';
+          ctx.fillStyle = `rgba(255, 248, 238, ${clampedAlpha * 0.85})`;
+          ctx.shadowColor = 'rgba(255, 248, 238, 0.5)';
           ctx.shadowBlur = p.radius * 2;
         }
         ctx.fill();
-        ctx.shadowBlur = 0;
       });
+      ctx.shadowBlur = 0;
+
+      // Render Shooting Stars
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const s = shootingStars[i];
+        s.x += Math.cos(s.angle) * s.speed;
+        s.y += Math.sin(s.angle) * s.speed;
+        s.alpha -= 0.02;
+
+        if (s.alpha <= 0) {
+          shootingStars.splice(i, 1);
+          continue;
+        }
+
+        const tailX = s.x - Math.cos(s.angle) * s.length;
+        const tailY = s.y - Math.sin(s.angle) * s.length;
+
+        const grad = ctx.createLinearGradient(tailX, tailY, s.x, s.y);
+        grad.addColorStop(0, 'rgba(217, 183, 122, 0)');
+        grad.addColorStop(0.7, `rgba(244, 226, 184, ${s.alpha * 0.6})`);
+        grad.addColorStop(1, `rgba(255, 255, 255, ${s.alpha})`);
+
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(tailX, tailY);
+        ctx.lineTo(s.x, s.y);
+        ctx.stroke();
+      }
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -98,11 +143,13 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      clearInterval(shootingTimer);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   const handleEnterClick = () => {
+    playStardustBurst();
     if (onEnterUniverse) {
       onEnterUniverse(audioWithEnter);
     }
@@ -114,9 +161,12 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
     <section id="beginning" className="intro-section">
       <canvas ref={canvasRef} className="intro-canvas" />
 
-      {/* Center Golden Portal */}
+      {/* Center Golden Multi-layered Portal */}
       <div className="intro-portal">
-        <div className="intro-portal-ring" />
+        <div className="intro-portal-ring ring-1" />
+        <div className="intro-portal-ring ring-2" />
+        <div className="intro-portal-ring ring-3" />
+        <div className="intro-portal-core" />
       </div>
 
       <div className="intro-content">
@@ -144,7 +194,7 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
             nameChars.map((char, index) => (
               <span
                 key={index}
-                className="char-fade"
+                className="char-fade glowing-char"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {char}
@@ -160,13 +210,13 @@ export default function Intro({ onEnterUniverse, soundEnabled, toggleSound }) {
           className="intro-actions"
           style={{
             opacity: stage >= 3 ? 1 : 0,
-            transform: stage >= 3 ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 1s ease 0.6s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s',
+            transform: stage >= 3 ? 'translateY(0)' : 'translateY(24px)',
+            transition: 'opacity 1.2s ease 0.6s, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.6s',
           }}
         >
           <button
             onClick={handleEnterClick}
-            className="celestial-button"
+            className="celestial-button enter-btn-pulse"
             aria-label="Enter Your Universe"
           >
             <Sparkles size={16} />

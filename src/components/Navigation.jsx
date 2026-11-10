@@ -5,7 +5,7 @@ const NAV_ITEMS = [
   { id: 'beginning', label: 'Beginning' },
   { id: 'the-angel', label: 'The Angel' },
   { id: 'her-universe', label: 'Her Universe' },
-  { id: 'memories', label: 'Memories' },
+  { id: 'why-special', label: 'Why You' },
   { id: 'a-letter', label: 'A Letter' },
 ];
 

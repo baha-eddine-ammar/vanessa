@@ -267,3 +267,4 @@ export default function MusicControl({ initialPlay = false }) {
     </div>
   );
 }
+
